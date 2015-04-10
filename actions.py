@@ -32,73 +32,6 @@ def sign(x):
       return 0
 
 
-def adjacent(pt1, pt2):
-   return ((pt1.x == pt2.x and abs(pt1.y - pt2.y) == 1) or
-      (pt1.y == pt2.y and abs(pt1.x - pt2.x) == 1))
-
-
-def next_position(world, entity_pt, dest_pt):
-   horiz = sign(dest_pt.x - entity_pt.x)
-   new_pt = point.Point(entity_pt.x + horiz, entity_pt.y)
-
-   if horiz == 0 or worldmodel.is_occupied(world, new_pt):
-      vert = sign(dest_pt.y - entity_pt.y)
-      new_pt = point.Point(entity_pt.x, entity_pt.y + vert)
-
-      if vert == 0 or worldmodel.is_occupied(world, new_pt):
-         new_pt = point.Point(entity_pt.x, entity_pt.y)
-
-   return new_pt
-
-
-def blob_next_position(world, entity_pt, dest_pt):
-   horiz = sign(dest_pt.x - entity_pt.x)
-   new_pt = point.Point(entity_pt.x + horiz, entity_pt.y)
-
-   if horiz == 0 or (worldmodel.is_occupied(world, new_pt) and
-      not isinstance(worldmodel.get_tile_occupant(world, new_pt),
-      entities.Ore)):
-      vert = sign(dest_pt.y - entity_pt.y)
-      new_pt = point.Point(entity_pt.x, entity_pt.y + vert)
-
-      if vert == 0 or (worldmodel.is_occupied(world, new_pt) and
-         not isinstance(worldmodel.get_tile_occupant(world, new_pt),
-         entities.Ore)):
-         new_pt = point.Point(entity_pt.x, entity_pt.y)
-
-   return new_pt
-
-
-def miner_to_ore(world, entity, ore):
-   entity_pt = entities.get_position(entity)
-   if not ore:
-      return ([entity_pt], False)
-   ore_pt = entities.get_position(ore)
-   if adjacent(entity_pt, ore_pt):
-      entities.set_resource_count(entity,
-         1 + entities.get_resource_count(entity))
-      remove_entity(world, ore)
-      return ([ore_pt], True)
-   else:
-      new_pt = next_position(world, entity_pt, ore_pt)
-      return (worldmodel.move_entity(world, entity, new_pt), False)
-
-
-def miner_to_smith(world, entity, smith):
-   entity_pt = entities.get_position(entity)
-   if not smith:
-      return ([entity_pt], False)
-   smith_pt = entities.get_position(smith)
-   if adjacent(entity_pt, smith_pt):
-      entities.set_resource_count(smith,
-         entities.get_resource_count(smith) +
-         entities.get_resource_count(entity))
-      entities.set_resource_count(entity, 0)
-      return ([], True)
-   else:
-      new_pt = next_position(world, entity_pt, smith_pt)
-      return (worldmodel.move_entity(world, entity, new_pt), False)
-
 
 def create_miner_not_full_action(world, entity, i_store):
    def action(current_ticks):
@@ -140,20 +73,7 @@ def create_miner_full_action(world, entity, i_store):
    return action
 
 
-def blob_to_vein(world, entity, vein):
-   entity_pt = entities.get_position(entity)
-   if not vein:
-      return ([entity_pt], False)
-   vein_pt = entities.get_position(vein)
-   if adjacent(entity_pt, vein_pt):
-      remove_entity(world, vein)
-      return ([vein_pt], True)
-   else:
-      new_pt = blob_next_position(world, entity_pt, vein_pt)
-      old_entity = worldmodel.get_tile_occupant(world, new_pt)
-      if isinstance(old_entity, entities.Ore):
-         remove_entity(world, old_entity)
-      return (worldmodel.move_entity(world, entity, new_pt), False)
+
 
 
 def create_ore_blob_action(world, entity, i_store):
@@ -289,11 +209,7 @@ def create_ore_transform_action(world, entity, i_store):
    return action
 
 
-def remove_entity(world, entity):
-   for action in entities.get_pending_actions(entity):
-      worldmodel.unschedule_action(world, action)
-   entities.clear_pending_actions(entity)
-   worldmodel.remove_entity(world, entity)
+
 
 
 def create_blob(world, name, pt, rate, ticks, i_store):

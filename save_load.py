@@ -53,21 +53,17 @@ VEIN_REACH = 5
 
 
 def save_world(world, file):
-   save_entities(world, file)
-   save_background(world, file)
+      for entity in worldmodel.get_entities(world):
+        file.write(entity.entity_string() + '\n')
+      for row in range(0, world.num_rows):
+         for col in range(0, world.num_cols):
+             file.write('background ' +
+                entities.get_name(
+                worldmodel.get_background(world, point.Point(col, row))) +
+                ' ' + str(col) + ' ' + str(row) + '\n')
 
-def save_entities(world, file):
-   for entity in worldmodel.get_entities(world):
-      file.write(entities.entity_string(entity) + '\n')
 
 
-def save_background(world, file):
-   for row in range(0, world.num_rows):
-      for col in range(0, world.num_cols):
-         file.write('background ' +
-            entities.get_name(
-               worldmodel.get_background(world, point.Point(col, row))) +
-            ' ' + str(col) + ' ' + str(row) + '\n')
 
 
 def load_world(world, images, file, run=False):
