@@ -1,7 +1,21 @@
 import point
 import worldmodel
 import actions
+BLOB_RATE_SCALE = 4
+BLOB_ANIMATION_RATE_SCALE = 50
+BLOB_ANIMATION_MIN = 1
+BLOB_ANIMATION_MAX = 3
 
+ORE_CORRUPT_MIN = 20000
+ORE_CORRUPT_MAX = 30000
+
+QUAKE_STEPS = 10
+QUAKE_DURATION = 1100
+QUAKE_ANIMATION_RATE = 100
+
+VEIN_SPAWN_DELAY = 500
+VEIN_RATE_MIN = 8000
+VEIN_RATE_MAX = 17000
 class Background:
    def __init__(self, name, imgs):
       self.name = name
@@ -145,9 +159,9 @@ class OreBlob:
           actions.remove_entity(world, vein)
           return ([vein_pt], True)
        else:
-          new_pt = blob_next_position(world, entity_pt, vein_pt)
+          new_pt = entity.blob_next_position(world, entity_pt, vein_pt)
           old_entity = worldmodel.get_tile_occupant(world, new_pt)
-          if isinstance(old_entity, entities.Ore):
+          if isinstance(old_entity, Ore):
              actions.remove_entity(world, old_entity)
           return (worldmodel.move_entity(world, entity, new_pt), False)
 
